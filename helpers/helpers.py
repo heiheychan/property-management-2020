@@ -4,9 +4,6 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 
-def show_data(df):
-    print(df.head(2))
-
 def initial_cleaning(df):
     df['property'] = df['property'].astype(str)
     df['amount'] = df['amount'].astype(int)
@@ -35,16 +32,17 @@ def filter_data(df, ca, p, s, e):
     return dff[mask1 & mask2]
 
 def process_bar(df ,m):
+    dff = df.copy()
     if m == 'a':
         d = 'for_date'
     elif m == 'c':
         d = 'transact_date'
-    df['month'] = df[d].dt.strftime('%Y/%m')
-    signed_amount = df.groupby(by='month').sum()['signed_amount'].to_frame()
-    income_mask = df['type'] == 'IN'
-    income_amount = df[income_mask].groupby(by='month').sum()['amount'].to_frame().rename(columns={'amount':'income'})
-    expense_mask = df['type'] == 'OUT'
-    expense_amount = df[expense_mask].groupby(by='month').sum()['amount'].to_frame().rename(columns={'amount':'expense'})
+    dff['month'] = dff[d].dt.strftime('%Y/%m')
+    signed_amount = dff.groupby(by='month').sum()['signed_amount'].to_frame()
+    income_mask = dff['type'] == 'IN'
+    income_amount = dff[income_mask].groupby(by='month').sum()['amount'].to_frame().rename(columns={'amount':'income'})
+    expense_mask = dff['type'] == 'OUT'
+    expense_amount = dff[expense_mask].groupby(by='month').sum()['amount'].to_frame().rename(columns={'amount':'expense'})
     d = pd.merge(signed_amount, income_amount, on='month', how='outer').merge(expense_amount, on='month', how='outer')
     d['signed_amount'].fillna(0, inplace=True)
     d['income'].fillna(0, inplace=True)
@@ -52,6 +50,15 @@ def process_bar(df ,m):
     d.reset_index(inplace=True)
     d.month = pd.to_datetime(d.month)
     return d
+
+def add_month(df, m):
+    tdd = df.copy()
+    if m == 'a':
+        d = 'for_date'
+    elif m == 'c':
+        d = 'transact_date'
+    tdd['month'] = tdd[d].dt.strftime('%Y/%m')
+    return tdd
 
 def generate_read_more():
     return html.Div([

@@ -36,12 +36,12 @@ else:
 USERNAME_PASSWORD_PAIRS = [['username','password'],[u, p]]
 
 # Global variables
-FILTERED_DF = None
-MODE = None
-TOTAL_PROFIT = None
-TOTAL_INCOME = None
-TOTAL_EXPENSE = None
-JSON_DF = None
+# FILTERED_DF = None
+# MODE = None
+# TOTAL_PROFIT = None
+# TOTAL_INCOME = None
+# TOTAL_EXPENSE = None
+# JSON_DF = None
 LAST_UPDATED = datetime.now()
 
 # Google Spreadsheets
@@ -263,30 +263,27 @@ app.layout = serve_layout
     Input('date-picker', 'end_date')
 ])
 def filter_data(ca, p, s, e):
-    global MODE
-    global TOTAL_PROFIT
-    global TOTAL_INCOME
-    global TOTAL_EXPENSE
-    global FILTERED_DF
-    global JSON_DF
+    # global MODE
+    # global FILTERED_DF
+    # global JSON_DF
     MODE = ca
 
     filtered_df = helpers.filter_data(df, ca, p, s, e)
-    FILTERED_DF = filtered_df
+    FILTERED_DF = filtered_df.to_json(date_format='iso', orient='split')
     processed_df = helpers.process_bar(filtered_df, MODE)
 
     TOTAL_PROFIT = processed_df['signed_amount'].sum()
     TOTAL_INCOME = processed_df['income'].sum()
     TOTAL_EXPENSE = processed_df['expense'].sum()
     JSON_DF = processed_df.to_json(date_format='iso', orient='split')
-    return JSON_DF
+    return [JSON_DF, FILTERED_DF, TOTAL_PROFIT, TOTAL_INCOME, TOTAL_EXPENSE, MODE]
 
 # Update bar chart
 @app.callback(Output('bar-chart', 'figure'),[
     Input('filtered-data', 'children')
 ])
-def update_bar_chart(df_json):
-    df1 = pd.read_json(df_json, orient='split')
+def update_bar_chart(dfs):
+    df1 = pd.read_json(dfs[0], orient='split')
 
     trace1 = go.Bar(
         x = df1['month'],
@@ -328,9 +325,9 @@ def update_bar_chart(df_json):
 @app.callback(Output('widget-1', 'children'), [
     Input('filtered-data', 'children')
 ])
-def update_widget_1(df_json):
+def update_widget_1(dfs):
 
-    if TOTAL_PROFIT >= 0:
+    if dfs[2] >= 0:
         c = "#50bfbf"
     else:
         c = "#bf0413"
@@ -344,7 +341,7 @@ def update_widget_1(df_json):
                 }
             ),
             html.H1(
-                TOTAL_PROFIT,
+                dfs[2],
                 style = {
                     'color': c
                 }
@@ -361,7 +358,7 @@ def update_widget_1(df_json):
 @app.callback(Output('widget-2', 'children'), [
     Input('filtered-data', 'children')
 ])
-def update_widget_2(df_json):
+def update_widget_2(dfs):
 
     return html.Div(
         [
@@ -372,7 +369,7 @@ def update_widget_2(df_json):
                 }
             ),
             html.H1(
-                TOTAL_INCOME,
+                dfs[3],
                 style = {
                     'color': '#85bf4b'
                 }
@@ -389,7 +386,7 @@ def update_widget_2(df_json):
 @app.callback(Output('widget-3', 'children'), [
     Input('filtered-data', 'children')
 ])
-def update_widget_3(df_json):
+def update_widget_3(dfs):
 
     return html.Div(
         [
@@ -400,7 +397,7 @@ def update_widget_3(df_json):
                 }
             ),
             html.H1(
-                TOTAL_EXPENSE,
+                dfs[4],
                 style = {
                     'color': '#bf0413'
                 }
@@ -417,8 +414,10 @@ def update_widget_3(df_json):
 @app.callback(Output('datatable-wrapper', 'children'), [
     Input('filtered-data', 'children')
 ])
-def update_datatable(df_json):
-    td = FILTERED_DF.copy()
+def update_datatable(dfs):
+    FILTERED_DF = pd.read_json(dfs[1], orient='split')
+    td = helpers.initial_cleaning(FILTERED_DF).copy()
+    td = helpers.add_month(td, dfs[5])
     td = td[['property', 'month', 'type', 'for', 'signed_amount', 'recurring', 'taxable', 'debt', 'note']].sort_values("month", ascending=False)
     table = dash_table.DataTable(
         id = 'datatable',
