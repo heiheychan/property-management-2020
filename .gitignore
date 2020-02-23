@@ -1,0 +1,9 @@
+venv
+*.pyc
+.DS_Store
+.env
+credentials
+explore.ipynb
+.ipynb_checkpoints
+etc
+share
