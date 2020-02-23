@@ -17,7 +17,6 @@ import dash_auth
 
 import plotly.graph_objs as go
 import helpers.helpers as helpers
-import credentials.username_password as cu
 
 # Google Sheet
 import gspread
@@ -28,6 +27,7 @@ if os.environ.get('IS_HEROKU', None) is not None:
     p = os.environ.get('PASSWORD')
     CRED_DICT = json.loads(os.environ.get('JSON'))
 else:
+    import credentials.username_password as cu
     u = cu.USERNAME
     p = cu.PASSWORD
     with open("./credentials/propertyManagementDashboard-2883708096cc.json") as k:
