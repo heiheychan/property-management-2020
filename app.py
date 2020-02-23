@@ -35,13 +35,6 @@ else:
 
 USERNAME_PASSWORD_PAIRS = [['username','password'],[u, p]]
 
-# Global variables
-# FILTERED_DF = None
-# MODE = None
-# TOTAL_PROFIT = None
-# TOTAL_INCOME = None
-# TOTAL_EXPENSE = None
-# JSON_DF = None
 LAST_UPDATED = datetime.now()
 
 # Google Spreadsheets
@@ -70,6 +63,7 @@ sched.start()
 
 # Instantiate the app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app.title = 'Property Management v1.0'
 auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
 server = app.server
 
