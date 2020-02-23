@@ -7,3 +7,6 @@ explore.ipynb
 .ipynb_checkpoints
 etc
 share
+bin
+lib
+include
