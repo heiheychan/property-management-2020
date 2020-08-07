@@ -64,7 +64,7 @@ sched.start()
 # Instantiate the app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = 'Property Management v1.0'
-auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
+# auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
 server = app.server
 
 def generate_property_options():
